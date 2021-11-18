@@ -551,8 +551,7 @@ void gpioDestroy(void)
         {
             if (gpio_props_dev.fd_mode[i] >= 0) // if opened, close pins
             {
-                if (gpio_props_dev.mode[i] == GPIO_OUT) // set pin to low if pin is output
-                    gpioWrite(i, GPIO_LOW);
+                gpioSetMode(i, GPIO_IN); // default behavior: Set all pins to high Z input
                 close(gpio_props_dev.fd_val[i]);
                 close(gpio_props_dev.fd_mode[i]);
                 GPIOUnexport(gpio_lut_pins[i]);
