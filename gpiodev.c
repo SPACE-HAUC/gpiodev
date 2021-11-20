@@ -208,13 +208,29 @@ set_mode:
     if (gpio_props_dev.fd_val[pin] < 0)
     {
         snprintf(path, 256, "/sys/class/gpio/gpio%d/value", bcmpin);
-        fd = open(path, O_RDWR); // open as read/write because you can read after you write
+        fd = open(path, mode == GPIO_OUT ? O_RDWR : O_RDONLY); // Open as read/write depending on mode
         if (fd == -1)
         {
             fprintf(stderr, "%s: Failed to open gpio value for read/write: %s\n", __func__, path);
             return (-1);
         }
         gpio_props_dev.fd_val[pin] = fd;
+    }
+    else // already opened, change mode accordingly
+    {
+        int flags = fcntl(fd, F_GETFL);
+        if (flags < 0)
+        {
+            eprintf("Error getting mode flag for gpio %d, error %s", pin, strerror(errno));
+            return -1;
+        }
+        flags &= ~O_ACCMODE;
+        flags |= (mode == GPIO_OUT ? O_RDWR : O_RDONLY);
+        if (!fcntl(fd, F_SETFL, flags))
+        {
+            eprintf("Error setting mode flag for gpio %d, error %s", pin, strerror(errno));
+            return -1;
+        }
     }
     if (mode == GPIO_OUT)
     {
