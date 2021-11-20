@@ -226,7 +226,7 @@ set_mode:
         }
         flags &= ~O_ACCMODE;
         flags |= (mode == GPIO_OUT ? O_RDWR : O_RDONLY);
-        if (!fcntl(gpio_props_dev.fd_val[pin], F_SETFL, flags))
+        if (fcntl(gpio_props_dev.fd_val[pin], F_SETFL, flags))
         {
             eprintf("Error setting mode flag for gpio %d, error %s", pin, strerror(errno));
             return -1;
